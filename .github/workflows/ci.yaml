@@ -1,0 +1,60 @@
+name: Rust
+
+on: [ push, pull_request ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+        rust:
+          - stable
+          - 1.58.0
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: taiki-e/install-action@just
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+
+      - name: Format
+        run: cargo fmt -- --check
+
+      - name: Lint
+        run: just lint
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build
+        run: cargo build --verbose
+
+      - name: Run tests
+        run: just test
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-tarpaulin@0.23.1
+
+      - name: Run cargo-tarpaulin
+        run: just coverage
+
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          verbose: true
