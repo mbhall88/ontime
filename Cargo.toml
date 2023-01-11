@@ -2,7 +2,31 @@
 name = "ontime"
 version = "0.1.0"
 edition = "2021"
-
+authors = ["Michael Hall <michael@mbh.sh>"]
+description = "Extract subsets of ONT (Nanopore) reads based on time"
+repository = "https://github.com/mbhall88/ontime"
+homepage = "https://github.com/mbhall88/ontime"
+readme = "README.md"
+license-file = "LICENSE"
+rust-version = "1.60.0"
+keywords = ["bioinformatics", "nanopore", "time", "fastq"]
+categories = ["science", "command-line-utilities"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[badges]
+maintenance = { status = "actively-developed" }
 
 [dependencies]
+needletail = { version = "0.4.1", features = ["compression"] }
+clap = { version = "4.0.32", features = ["derive"] }
+niffler = "2.4.0"
+thiserror = "1.0.38"
+anyhow = "1.0.68"
+log = "0.4.17"
+env_logger = "0.10.0"
+time = { version = "0.3.17", features = ["parsing", "macros"] }
+lazy_static = "1.4.0"
+regex = "1.7.1"
+bstr = "1.1.0"
+
+[dev-dependencies]
+tempfile = "3.3.0"
