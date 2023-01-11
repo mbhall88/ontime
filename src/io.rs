@@ -18,10 +18,6 @@ pub struct Fastx {
 /// A collection of custom errors relating to the working with files for this package.
 #[derive(Error, Debug)]
 pub enum IOError {
-    /// Indicates that the file is not one of the allowed file types as specified by [`FileType`](#filetype).
-    #[error("File type of {0} is not fasta or fastq")]
-    UnknownFileType(String),
-
     /// Indicates that the specified input file could not be opened/read.
     #[error("Read error")]
     ReadError {
@@ -45,14 +41,6 @@ pub enum IOError {
     /// Indicates and error trying to create the compressor
     #[error(transparent)]
     CompressOutputError(#[from] niffler::Error),
-
-    /// Indicates that some indices we expected to find in the input file weren't found.
-    #[error("Some expected indices were not in the input file")]
-    IndicesNotFound,
-
-    /// Indicates that writing to the output file failed.
-    #[error("Could not write to output file")]
-    WriteError { source: anyhow::Error },
 }
 
 impl Fastx {

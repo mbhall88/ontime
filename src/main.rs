@@ -22,7 +22,7 @@ fn main() -> Result<()> {
     info!("{:?}", args);
     let input_fastx = Fastx::from_path(&args.input);
 
-    let mut output_handle = match args.output {
+    let mut _output_handle = match args.output {
         None => match args.output_type {
             None => Box::new(stdout()),
             Some(fmt) => niffler::basic::get_writer(Box::new(stdout()), fmt, args.compress_level)?,
@@ -34,6 +34,10 @@ fn main() -> Result<()> {
                 .context("unable to create the first output file")?
         }
     };
+
+    let _start_times = input_fastx
+        .start_times()
+        .context("Failed to parse a start time")?;
 
     Ok(())
 }

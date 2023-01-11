@@ -2,8 +2,8 @@ use bstr::ByteSlice;
 use lazy_static::lazy_static;
 use needletail::parser::SequenceRecord;
 use regex::bytes::Regex;
-use time::PrimitiveDateTime;
 use time::format_description::well_known::Iso8601;
+use time::PrimitiveDateTime;
 
 pub trait FastxRecordExt {
     fn start_time(&self) -> Option<PrimitiveDateTime>;
@@ -18,7 +18,7 @@ impl FastxRecordExt for SequenceRecord<'_> {
         let Some(caps) = RE.captures(self.id()) else {return None};
         let Some(m) = caps.name("time") else {return None};
         let datetime = m.as_bytes().to_str_lossy();
-        PrimitiveDateTime::parse(&*datetime, &Iso8601::DEFAULT).ok()
+        PrimitiveDateTime::parse(&datetime, &Iso8601::DEFAULT).ok()
     }
 }
 
@@ -26,7 +26,7 @@ impl FastxRecordExt for SequenceRecord<'_> {
 mod tests {
     use super::*;
     use needletail::parse_fastx_file;
-    use std::io::{Read, Write};
+    use std::io::Write;
     use tempfile::Builder;
     use time::macros::{date, time};
 
@@ -57,7 +57,7 @@ mod tests {
         let record = rec.unwrap();
 
         let actual = record.start_time().unwrap();
-        let expected = PrimitiveDateTime::new(date!(2022-12-12), time!(18:39:27));
+        let expected = PrimitiveDateTime::new(date!(2022 - 12 - 12), time!(18:39:27));
 
         assert_eq!(actual, expected)
     }

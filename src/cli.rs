@@ -18,7 +18,7 @@ pub struct Cli {
     /// ontime will attempt to infer the output compression format automatically from the filename
     /// extension. This option is used to override that. If writing to stdout, the default is
     /// uncompressed
-    #[clap(short = 'O', long, value_name = "u|b|g|l", value_parser = parse_compression_format, value_parser = ["u", "b", "g", "l"], ignore_case=true, hide_possible_values = true)]
+    #[clap(short = 'O', long, value_name = "u|b|g|l", value_parser = parse_compression_format, ignore_case=true, hide_possible_values = true)]
     pub output_type: Option<niffler::compression::Format>,
     /// Compression level to use if compressing output
     #[clap(short = 'l', long, value_parser = parse_level, default_value="6", value_name = "1-9")]
