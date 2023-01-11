@@ -26,7 +26,7 @@ pub struct Cli {
 }
 
 /// A collection of custom errors relating to the command line interface for this package.
-#[derive(Error, Debug, PartialEq)]
+#[derive(Error, Debug, PartialEq, Eq)]
 pub enum CliError {
     /// Indicates that a string cannot be parsed into a [`CompressionFormat`](#compressionformat).
     #[error("{0} is not a valid output format")]

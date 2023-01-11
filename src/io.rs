@@ -9,7 +9,7 @@ use thiserror::Error;
 use time::PrimitiveDateTime;
 
 /// A `Struct` used for seamlessly dealing with either compressed or uncompressed fasta/fastq files.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Fastx {
     /// The path for the file.
     path: PathBuf,
