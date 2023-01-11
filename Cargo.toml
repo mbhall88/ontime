@@ -8,7 +8,7 @@ repository = "https://github.com/mbhall88/ontime"
 homepage = "https://github.com/mbhall88/ontime"
 readme = "README.md"
 license-file = "LICENSE"
-rust-version = "1.60.0"
+rust-version = "1.65.0"
 keywords = ["bioinformatics", "nanopore", "time", "fastq"]
 categories = ["science", "command-line-utilities"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
