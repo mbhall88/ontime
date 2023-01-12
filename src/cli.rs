@@ -1,11 +1,12 @@
 use clap::Parser;
 use lazy_static::lazy_static;
+use ontime::DurationExt;
 use regex::{Regex, RegexBuilder};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 use time::format_description::well_known::Iso8601;
-use time::PrimitiveDateTime;
+use time::{Duration, PrimitiveDateTime};
 
 lazy_static! {
     pub static ref DURATION_RE: Regex = RegexBuilder::new(
@@ -114,7 +115,7 @@ fn check_path_exists<S: AsRef<OsStr> + ?Sized>(s: &S) -> Result<PathBuf, String>
 }
 
 fn validate_time(s: &str) -> Result<String, String> {
-    if PrimitiveDateTime::parse(s, &Iso8601::DEFAULT).is_ok() || DURATION_RE.is_match(s) {
+    if PrimitiveDateTime::parse(s, &Iso8601::DEFAULT).is_ok() || Duration::from_str(s).is_ok() {
         Ok(s.to_string())
     } else {
         Err(format!("{} is not a recognised time format", s))
@@ -203,19 +204,15 @@ mod tests {
             "11s",
             "-12h30m",
             "1h 30m",
+            "1w11h32m21s",
             "-60h 2s",
+            "11sec",
+            "-12h30min",
         ];
         for s in valid_times {
             assert!(validate_time(s).is_ok());
         }
-        let invalid_times = [
-            "202-12-12T18:39Z",
-            "1w11h32m21s",
-            "11sec",
-            "-12h30min",
-            "1h -30m",
-            "-60h 2ms",
-        ];
+        let invalid_times = ["202-12-12T18:39Z", "1h -30m", "-60h 2foo"];
         assert!(invalid_times.iter().all(|s| validate_time(s).is_err()))
     }
 }

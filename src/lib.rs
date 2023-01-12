@@ -1,9 +1,10 @@
 use bstr::ByteSlice;
+use duration_str::DError;
 use lazy_static::lazy_static;
 use needletail::parser::SequenceRecord;
 use regex::bytes::Regex;
 use time::format_description::well_known::Iso8601;
-use time::PrimitiveDateTime;
+use time::{Duration, PrimitiveDateTime};
 
 lazy_static! {
     pub static ref DATETIME_RE: Regex =
@@ -22,6 +23,24 @@ impl FastxRecordExt for SequenceRecord<'_> {
         PrimitiveDateTime::parse(&datetime, &Iso8601::DEFAULT).ok()
     }
 }
+
+pub trait DurationExt {
+    fn from_str(s: &str) -> Result<Self, DError>
+    where
+        Self: Sized;
+}
+
+impl DurationExt for Duration {
+    fn from_str(s: &str) -> Result<Self, DError> {
+        if s.starts_with('-') {
+            let dur = duration_str::parse_time(&s[1..])?;
+            Ok(-1 * dur)
+        } else {
+            duration_str::parse_time(s)
+        }
+    }
+}
+
 //
 // pub struct Sampler {
 //     earliest: PrimitiveDateTime,
@@ -37,10 +56,13 @@ impl FastxRecordExt for SequenceRecord<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use duration_str::parse_time;
     use needletail::parse_fastx_file;
     use std::io::Write;
+    use std::ops::Mul;
     use tempfile::Builder;
     use time::macros::{date, time};
+    use time::Duration;
 
     #[test]
     fn test_no_start_time() {
@@ -104,5 +126,37 @@ mod tests {
         let expected = None;
 
         assert_eq!(actual, expected)
+    }
+
+    #[test]
+    fn test_duration_from_str_negative() {
+        let s = "-1h";
+        let actual = Duration::from_str(s).unwrap();
+        let expected = Duration::hours(-1);
+
+        assert_eq!(actual, expected)
+    }
+
+    #[test]
+    fn test_duration_from_str_negative_invalid() {
+        let s = "1d-1h";
+        let actual = Duration::from_str(s);
+        assert!(actual.is_err())
+    }
+
+    #[test]
+    fn test_duration_from_str() {
+        let s = "11h30min";
+        let actual = Duration::from_str(s).unwrap();
+        let expected = Duration::seconds(41_400);
+
+        assert_eq!(actual, expected)
+    }
+
+    #[test]
+    fn test_duration_from_str_invalid() {
+        let s = "11h30min12foo";
+        let actual = Duration::from_str(s);
+        assert!(actual.is_err())
     }
 }

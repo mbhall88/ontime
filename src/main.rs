@@ -3,12 +3,14 @@ mod io;
 
 use crate::cli::Cli;
 use crate::io::Fastx;
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use clap::Parser;
 use env_logger::Builder;
 use log::info;
 use log::LevelFilter;
 use std::io::stdout;
+use time::format_description::well_known::Iso8601;
+use time::PrimitiveDateTime;
 
 fn main() -> Result<()> {
     let args = Cli::parse();
@@ -31,13 +33,32 @@ fn main() -> Result<()> {
             let out_fastx = Fastx::from_path(&p);
             out_fastx
                 .create(args.compress_level, args.output_type)
-                .context("unable to create the first output file")?
+                .context("unable to create the output file")?
         }
     };
 
-    let _start_times = input_fastx
+    info!("Extracting read start times...");
+
+    let start_times = input_fastx
         .start_times()
         .context("Failed to parse a start time")?;
+
+    if start_times.is_empty() {
+        return Err(anyhow!("Did not find any start times in the input"));
+    }
+
+    info!("Gathered start times for {} reads", start_times.len());
+
+    // safe to unwrap as we know start times is not empty
+    let first_timestamp = start_times.iter().min().unwrap();
+
+    let earliest = match args.earliest {
+        None => first_timestamp.to_owned(),
+        Some(s) => match PrimitiveDateTime::parse(&s, &Iso8601::DEFAULT) {
+            Ok(t) => t,
+            Err(_) => todo!(),
+        },
+    };
 
     Ok(())
 }
