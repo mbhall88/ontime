@@ -32,8 +32,8 @@ pub trait DurationExt {
 
 impl DurationExt for Duration {
     fn from_str(s: &str) -> Result<Self, DError> {
-        if s.starts_with('-') {
-            let dur = duration_str::parse_time(&s[1..])?;
+        if let Some(pos_s) = s.strip_prefix('-') {
+            let dur = duration_str::parse_time(pos_s)?;
             Ok(-1 * dur)
         } else {
             duration_str::parse_time(s)
@@ -56,10 +56,8 @@ impl DurationExt for Duration {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use duration_str::parse_time;
     use needletail::parse_fastx_file;
     use std::io::Write;
-    use std::ops::Mul;
     use tempfile::Builder;
     use time::macros::{date, time};
     use time::Duration;

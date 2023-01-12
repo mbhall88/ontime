@@ -41,13 +41,12 @@ pub struct Cli {
     ///
     /// This can be a timestamp - e.g. 2022-11-20T18:00:00 - or a duration from the start - e.g.
     /// 2h30m (2 hours and 30 minutes from the start). See the docs for more examples
-    #[clap(short, long, value_parser = validate_time, value_name = "DATE/DURATION")]
+    #[clap(short, long, value_parser = validate_time, value_name = "DATE/DURATION", allow_hyphen_values = true)]
     pub earliest: Option<String>,
     /// Latest start time; otherwise the latest time is used
     ///
-    /// See --earliest (and docs) for examples. Note: a negative value can be given - e.g. -1h means
-    /// the latest start time will be 1 hour from the latest time in the fastq file
-    #[clap(short, long, value_parser = validate_time, value_name = "DATE/DURATION")]
+    /// See --earliest (and docs) for examples
+    #[clap(short, long, value_parser = validate_time, value_name = "DATE/DURATION", allow_hyphen_values = true)]
     pub latest: Option<String>,
 }
 
