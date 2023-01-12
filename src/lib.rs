@@ -41,17 +41,22 @@ impl DurationExt for Duration {
     }
 }
 
-//
-// pub struct Sampler {
-//     earliest: PrimitiveDateTime,
-//     latest: PrimitiveDateTime,
-// }
-//
-// impl Sampler {
-//     pub fn new(earliest: PrimitiveDateTime, latest: PrimitiveDateTime) -> Self {
-//         Sampler { earliest, latest }
-//     }
-// }
+pub fn valid_indices(
+    timestamps: &[PrimitiveDateTime],
+    earliest: &PrimitiveDateTime,
+    latest: &PrimitiveDateTime,
+) -> (Vec<bool>, usize) {
+    let mut to_keep: Vec<bool> = vec![false; timestamps.len()];
+    let mut nb_reads_to_keep = 0;
+    timestamps.iter().enumerate().for_each(|(i, t)| {
+        if earliest <= t && t <= latest {
+            to_keep[i] = true;
+            nb_reads_to_keep += 1;
+        }
+    });
+
+    (to_keep, nb_reads_to_keep)
+}
 
 #[cfg(test)]
 mod tests {

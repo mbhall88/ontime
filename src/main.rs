@@ -10,7 +10,7 @@ use itertools::Itertools;
 use itertools::MinMaxResult::{MinMax, NoElements, OneElement};
 use log::info;
 use log::LevelFilter;
-use ontime::DurationExt;
+use ontime::{valid_indices, DurationExt};
 use std::io::stdout;
 use time::format_description::well_known::Iso8601;
 use time::{Duration, PrimitiveDateTime};
@@ -28,7 +28,7 @@ fn main() -> Result<()> {
 
     let input_fastx = Fastx::from_path(&args.input);
 
-    let mut _output_handle = match args.output {
+    let mut output_handle = match args.output {
         None => match args.output_type {
             None => Box::new(stdout()),
             Some(fmt) => niffler::basic::get_writer(Box::new(stdout()), fmt, args.compress_level)?,
@@ -110,9 +110,18 @@ fn main() -> Result<()> {
     }
 
     info!(
-        "Extracting reads with a start time between {} and {}",
+        "Extracting reads with a start time between {} and {}...",
         earliest, latest
     );
+
+    let (reads_to_keep, nb_reads_to_keep) = valid_indices(&start_times, &earliest, &latest);
+    input_fastx.extract_reads_in_timeframe_into(
+        &reads_to_keep,
+        nb_reads_to_keep,
+        &mut output_handle,
+    )?;
+
+    info!("Done! Kept {} reads", nb_reads_to_keep);
 
     Ok(())
 }

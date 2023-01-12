@@ -41,6 +41,14 @@ pub enum IOError {
     /// Indicates and error trying to create the compressor
     #[error(transparent)]
     CompressOutputError(#[from] niffler::Error),
+
+    /// Indicates that some indices we expected to find in the input file weren't found.
+    #[error("Some expected indices were not in the input file")]
+    IndicesNotFound,
+
+    /// Indicates that writing to the output file failed.
+    #[error("Could not write to output file")]
+    WriteError { source: anyhow::Error },
 }
 
 impl Fastx {
@@ -112,5 +120,42 @@ impl Fastx {
             }
         }
         Ok(start_times)
+    }
+
+    pub fn extract_reads_in_timeframe_into<T: Write>(
+        &self,
+        reads_to_keep: &[bool],
+        nb_reads_keep: usize,
+        write_to: &mut T,
+    ) -> Result<(), IOError> {
+        let mut reader =
+            parse_fastx_file(&self.path).map_err(|source| IOError::ReadError { source })?;
+        let mut read_idx: usize = 0;
+        let mut nb_reads_written = 0;
+
+        while let Some(record) = reader.next() {
+            match record {
+                Err(source) => return Err(IOError::ParseError { source }),
+                Ok(rec) if reads_to_keep[read_idx] => {
+                    rec.write(write_to, None)
+                        .map_err(|err| IOError::WriteError {
+                            source: anyhow::Error::from(err),
+                        })?;
+                    nb_reads_written += 1;
+                    if nb_reads_keep == nb_reads_written {
+                        break;
+                    }
+                }
+                Ok(_) => (),
+            }
+
+            read_idx += 1;
+        }
+
+        if nb_reads_written == nb_reads_keep {
+            Ok(())
+        } else {
+            Err(IOError::IndicesNotFound)
+        }
     }
 }
