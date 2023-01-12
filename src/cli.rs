@@ -1,7 +1,21 @@
 use clap::Parser;
+use lazy_static::lazy_static;
+use regex::{Regex, RegexBuilder};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
+use time::format_description::well_known::Iso8601;
+use time::PrimitiveDateTime;
+
+lazy_static! {
+    pub static ref DURATION_RE: Regex = RegexBuilder::new(
+        r"^-?(?P<days>\d+d)?\s*(?P<hours>\d+h)?\s*(?P<minutes>\d+m)?\s*(?P<seconds>\d+s)?$"
+    )
+    .case_insensitive(true)
+    .ignore_whitespace(true)
+    .build()
+    .unwrap();
+}
 
 /// Extract subsets of ONT (Nanopore) reads based on time
 #[derive(Parser, Debug)]
@@ -15,14 +29,25 @@ pub struct Cli {
     pub output: Option<PathBuf>,
     /// u: uncompressed; b: Bzip2; g: Gzip; l: Lzma
     ///
-    /// ontime will attempt to infer the output compression format automatically from the filename
-    /// extension. This option is used to override that. If writing to stdout, the default is
-    /// uncompressed
+    /// ontime will attempt to infer the output compression format automatically from the output
+    /// extension. If writing to stdout, the default is uncompressed (u)
     #[clap(short = 'O', long, value_name = "u|b|g|l", value_parser = parse_compression_format, ignore_case=true, hide_possible_values = true)]
     pub output_type: Option<niffler::compression::Format>,
     /// Compression level to use if compressing output
-    #[clap(short = 'l', long, value_parser = parse_level, default_value="6", value_name = "1-9")]
+    #[clap(short = 'L', long, value_parser = parse_level, default_value="6", value_name = "1-9")]
     pub compress_level: niffler::Level,
+    /// Earliest start time; otherwise the earliest time is used
+    ///
+    /// This can be a timestamp - e.g. 2022-11-20T18:00:00 - or a duration from the start - e.g.
+    /// 2h30m (2 hours and 30 minutes from the start). See the docs for more examples
+    #[clap(short, long, value_parser = validate_time, value_name = "DATE/DURATION")]
+    pub earliest: Option<String>,
+    /// Latest start time; otherwise the latest time is used
+    ///
+    /// See --earliest (and docs) for examples. Note: a negative value can be given - e.g. -1h means
+    /// the latest start time will be 1 hour from the latest time in the fastq file
+    #[clap(short, long, value_parser = validate_time, value_name = "DATE/DURATION")]
+    pub latest: Option<String>,
 }
 
 /// A collection of custom errors relating to the command line interface for this package.
@@ -85,6 +110,14 @@ fn check_path_exists<S: AsRef<OsStr> + ?Sized>(s: &S) -> Result<PathBuf, String>
         Ok(path)
     } else {
         Err(format!("{:?} does not exist", path))
+    }
+}
+
+fn validate_time(s: &str) -> Result<String, String> {
+    if PrimitiveDateTime::parse(s, &Iso8601::DEFAULT).is_ok() || DURATION_RE.is_match(s) {
+        Ok(s.to_string())
+    } else {
+        Err(format!("{} is not a recognised time format", s))
     }
 }
 
@@ -158,5 +191,31 @@ mod tests {
             niffler::Format::from_path("baz.fq.lzma"),
             niffler::Format::Lzma
         );
+    }
+
+    #[test]
+    fn test_validate_time() {
+        let valid_times = [
+            "2022-12-12T18:39:09Z",
+            "2022-12-12T18:39",
+            "2022-12-12T18:39:09",
+            "1d11h32m21s",
+            "11s",
+            "-12h30m",
+            "1h 30m",
+            "-60h 2s",
+        ];
+        for s in valid_times {
+            assert!(validate_time(s).is_ok());
+        }
+        let invalid_times = [
+            "202-12-12T18:39Z",
+            "1w11h32m21s",
+            "11sec",
+            "-12h30min",
+            "1h -30m",
+            "-60h 2ms",
+        ];
+        assert!(invalid_times.iter().all(|s| validate_time(s).is_err()))
     }
 }
