@@ -37,7 +37,7 @@ fn main() -> Result<()> {
             let out_fastx = Fastx::from_path(&p);
             out_fastx
                 .create(args.compress_level, args.output_type)
-                .context("unable to create the output file")?
+                .context("Failed to create the output file")?
         }
     };
 
@@ -72,13 +72,13 @@ fn main() -> Result<()> {
             Err(_) => {
                 let duration = Duration::from_str(&s)?;
                 if duration.is_negative() {
-                    last_timestamp.checked_add(duration).context(
-                        "Subtracting --earliest from the last timestamp caused an overflow",
-                    )?
+                    last_timestamp
+                        .checked_add(duration)
+                        .context("Subtracting --from from the last timestamp caused an overflow")?
                 } else {
                     first_timestamp
                         .checked_add(duration)
-                        .context("Adding --earliest to the first timestamp caused an overflow")?
+                        .context("Adding --from to the first timestamp caused an overflow")?
                 }
             }
         },
@@ -91,13 +91,13 @@ fn main() -> Result<()> {
             Err(_) => {
                 let duration = Duration::from_str(&s)?;
                 if duration.is_negative() {
-                    last_timestamp.checked_add(duration).context(
-                        "Subtracting --latest from the last timestamp caused an overflow",
-                    )?
+                    last_timestamp
+                        .checked_add(duration)
+                        .context("Subtracting --to from the last timestamp caused an overflow")?
                 } else {
                     first_timestamp
                         .checked_add(duration)
-                        .context("Adding --latest to the first timestamp caused an overflow")?
+                        .context("Adding --to to the first timestamp caused an overflow")?
                 }
             }
         },
