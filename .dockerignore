@@ -1,0 +1,8 @@
+.git*
+target/
+tmp*/
+.ide*
+justfile
+install/
+tests/
+*.fq
