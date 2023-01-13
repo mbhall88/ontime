@@ -9,7 +9,9 @@ Extract subsets of ONT (Nanopore) reads based on time
 
 - [Motivation](#motivation)
 - [Install](#install)
+- [Examples](#examples)
 - [Usage](#usage)
+- [Cite](#cite)
 
 ## Motivation
 
@@ -281,7 +283,7 @@ Options:
 ```
 
 
-# Cite
+## Cite
 
 [//]: # (`ontime` is archived [at Zenodo]&#40;https://zenodo.org/record/5706785&#41;.)
 
