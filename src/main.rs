@@ -12,8 +12,13 @@ use log::info;
 use log::LevelFilter;
 use ontime::{valid_indices, DurationExt};
 use std::io::stdout;
-use time::format_description::well_known::Iso8601;
+use time::format_description::well_known::Rfc3339;
+use time::format_description::FormatItem;
+use time::macros::format_description;
 use time::{Duration, PrimitiveDateTime};
+
+const TIME_FMT: &[FormatItem<'_>] =
+    format_description!("[year]-[month]-[day]T[hour]:[minute]:[second].[subsecond]Z");
 
 fn main() -> Result<()> {
     let args = Cli::parse();
@@ -24,7 +29,6 @@ fn main() -> Result<()> {
         .format_module_path(false)
         .format_target(false)
         .init();
-    info!("{:?}", args);
 
     let input_fastx = Fastx::from_path(&args.input);
 
@@ -60,14 +64,21 @@ fn main() -> Result<()> {
         MinMax(x, y) => (*x, *y),
     };
 
-    info!(
-        "First and last timestamps in the input are {} and {}",
-        first_timestamp, last_timestamp
-    );
+    if args.show {
+        println!("Earliest: {}", first_timestamp.format(TIME_FMT)?);
+        println!("Latest  : {}", last_timestamp.format(TIME_FMT)?);
+        return Ok(());
+    } else {
+        info!(
+            "First and last timestamps in the input are {} and {}",
+            first_timestamp.format(TIME_FMT)?,
+            last_timestamp.format(TIME_FMT)?
+        );
+    }
 
     let earliest = match args.earliest {
         None => first_timestamp.to_owned(),
-        Some(s) => match PrimitiveDateTime::parse(&s, &Iso8601::DEFAULT) {
+        Some(s) => match PrimitiveDateTime::parse(&s, &Rfc3339) {
             Ok(t) => t,
             Err(_) => {
                 let duration = Duration::from_str(&s)?;
@@ -86,7 +97,7 @@ fn main() -> Result<()> {
 
     let latest = match args.latest {
         None => last_timestamp.to_owned(),
-        Some(s) => match PrimitiveDateTime::parse(&s, &Iso8601::DEFAULT) {
+        Some(s) => match PrimitiveDateTime::parse(&s, &Rfc3339) {
             Ok(t) => t,
             Err(_) => {
                 let duration = Duration::from_str(&s)?;

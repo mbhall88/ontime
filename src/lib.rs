@@ -3,12 +3,11 @@ use duration_str::DError;
 use lazy_static::lazy_static;
 use needletail::parser::SequenceRecord;
 use regex::bytes::Regex;
-use time::format_description::well_known::Iso8601;
+use time::format_description::well_known::Rfc3339;
 use time::{Duration, PrimitiveDateTime};
 
 lazy_static! {
-    pub static ref DATETIME_RE: Regex =
-        Regex::new(r"start_time=(?P<time>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?)").unwrap();
+    pub static ref DATETIME_RE: Regex = Regex::new(r"start_time=(?P<time>\S+)\s*").unwrap();
 }
 
 pub trait FastxRecordExt {
@@ -20,7 +19,7 @@ impl FastxRecordExt for SequenceRecord<'_> {
         let Some(caps) = DATETIME_RE.captures(self.id()) else {return None};
         let Some(m) = caps.name("time") else {return None};
         let datetime = m.as_bytes().to_str_lossy();
-        PrimitiveDateTime::parse(&datetime, &Iso8601::DEFAULT).ok()
+        PrimitiveDateTime::parse(&datetime, &Rfc3339).ok()
     }
 }
 
@@ -84,7 +83,7 @@ mod tests {
     }
 
     #[test]
-    fn test_start_time_valid() {
+    fn test_start_time_old_valid() {
         let text = "@read1 ch=352 start_time=2022-12-12T18:39:27Z model_version_id=2021\nA\n+\n1";
         let mut file = Builder::new().suffix(".fa").tempfile().unwrap();
         file.write_all(text.as_bytes()).unwrap();
@@ -100,8 +99,9 @@ mod tests {
     }
 
     #[test]
-    fn test_start_time_valid_without_z() {
-        let text = "@read1 ch=352 start_time=2022-12-12T18:39:27 model_version_id=2021\nA\n+\n1";
+    fn test_start_time_offset_valid() {
+        let text =
+            "@read1 ch=352 start_time=2021-07-08T17:47:25+01:00 model_version_id=2021\nA\n+\n1";
         let mut file = Builder::new().suffix(".fa").tempfile().unwrap();
         file.write_all(text.as_bytes()).unwrap();
 
@@ -110,9 +110,39 @@ mod tests {
         let record = rec.unwrap();
 
         let actual = record.start_time().unwrap();
-        let expected = PrimitiveDateTime::new(date!(2022 - 12 - 12), time!(18:39:27));
+        let expected = PrimitiveDateTime::new(date!(2021 - 07 - 08), time!(17:47:25));
 
         assert_eq!(actual, expected)
+    }
+
+    #[test]
+    fn test_start_time_offset_with_micro_valid() {
+        let text = "@read1 ch=352 start_time=2021-07-08T17:47:25.558027+01:00 model_version_id=2021\nA\n+\n1";
+        let mut file = Builder::new().suffix(".fa").tempfile().unwrap();
+        file.write_all(text.as_bytes()).unwrap();
+
+        let mut reader = parse_fastx_file(file.path()).unwrap();
+        let rec = reader.next().unwrap();
+        let record = rec.unwrap();
+
+        let actual = record.start_time().unwrap();
+        let expected = PrimitiveDateTime::new(date!(2021 - 07 - 08), time!(17:47:25.558027));
+
+        assert_eq!(actual, expected)
+    }
+
+    #[test]
+    fn test_start_time_invalid_without_z() {
+        let text = "@read1 ch=352 start_time=2022-12-12T18:39:27 model_version_id=2021\nA\n+\n1";
+        let mut file = Builder::new().suffix(".fa").tempfile().unwrap();
+        file.write_all(text.as_bytes()).unwrap();
+
+        let mut reader = parse_fastx_file(file.path()).unwrap();
+        let rec = reader.next().unwrap();
+        let record = rec.unwrap();
+
+        let actual = record.start_time();
+        assert!(actual.is_none())
     }
 
     #[test]

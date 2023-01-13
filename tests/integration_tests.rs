@@ -401,3 +401,35 @@ fn output_is_lzma_compressed() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+#[test]
+fn show_earliest_and_latest() -> Result<(), Box<dyn std::error::Error>> {
+    let text = indoc! {b"@s0 start_time=2022-12-12T18:00:00Z
+    A
+    +
+    1
+    @s2 start_time=2022-12-12T14:00:00Z
+    G
+    +
+    4
+    @s1 start_time=2022-12-12T12:00:00Z
+    C
+    +
+    1
+    "};
+    let mut file = tempfile::Builder::new().suffix(".fq").tempfile().unwrap();
+    file.write_all(text).unwrap();
+    let mut cmd = Command::cargo_bin(BIN).unwrap();
+    let output = cmd
+        .args(["--show", file.path().to_str().unwrap()])
+        .unwrap()
+        .stdout;
+
+    let expected = indoc! {b"Earliest: 2022-12-12T12:00:00.0Z
+    Latest  : 2022-12-12T18:00:00.0Z
+    "};
+
+    assert_eq!(output, expected);
+
+    Ok(())
+}

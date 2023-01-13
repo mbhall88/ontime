@@ -5,7 +5,7 @@ use regex::{Regex, RegexBuilder};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
-use time::format_description::well_known::Iso8601;
+use time::format_description::well_known::Rfc3339;
 use time::{Duration, PrimitiveDateTime};
 
 lazy_static! {
@@ -48,6 +48,9 @@ pub struct Cli {
     /// See --from (and docs) for examples
     #[clap(short = 't', long = "to", value_parser = validate_time, value_name = "DATE/DURATION", allow_hyphen_values = true)]
     pub latest: Option<String>,
+    /// Show the earliest and latest start times in the input and exit
+    #[clap(short, long)]
+    pub show: bool,
 }
 
 /// A collection of custom errors relating to the command line interface for this package.
@@ -114,7 +117,7 @@ fn check_path_exists<S: AsRef<OsStr> + ?Sized>(s: &S) -> Result<PathBuf, String>
 }
 
 fn validate_time(s: &str) -> Result<String, String> {
-    if PrimitiveDateTime::parse(s, &Iso8601::DEFAULT).is_ok() || Duration::from_str(s).is_ok() {
+    if PrimitiveDateTime::parse(s, &Rfc3339).is_ok() || Duration::from_str(s).is_ok() {
         Ok(s.to_string())
     } else {
         Err(format!("{} is not a recognised time format", s))
@@ -197,8 +200,6 @@ mod tests {
     fn test_validate_time() {
         let valid_times = [
             "2022-12-12T18:39:09Z",
-            "2022-12-12T18:39",
-            "2022-12-12T18:39:09",
             "1d11h32m21s",
             "11s",
             "-12h30m",
@@ -207,11 +208,17 @@ mod tests {
             "-60h 2s",
             "11sec",
             "-12h30min",
+            "2021-07-08T17:47:25.558027+01:00",
         ];
         for s in valid_times {
             assert!(validate_time(s).is_ok());
         }
-        let invalid_times = ["202-12-12T18:39Z", "1h -30m", "-60h 2foo"];
+        let invalid_times = [
+            "202-12-12T18:39Z",
+            "1h -30m",
+            "-60h 2foo",
+            "2022-12-12T18:39:09",
+        ];
         assert!(invalid_times.iter().all(|s| validate_time(s).is_err()))
     }
 }
