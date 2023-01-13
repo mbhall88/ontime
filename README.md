@@ -280,6 +280,38 @@ Options:
           Print version information
 ```
 
+
+# Cite
+
+[//]: # (`ontime` is archived [at Zenodo]&#40;https://zenodo.org/record/5706785&#41;.)
+
+[//]: # ()
+[//]: # (```bibtex)
+
+[//]: # (@software{Hall2023ontime,)
+
+[//]: # (  author       = {Hall, Michael B.},)
+
+[//]: # (  title        = {{psdm: Compute a pairwise SNP distance matrix from )
+
+[//]: # (                   one or two alignment&#40;s&#41;}},)
+
+[//]: # (  month        = nov,)
+
+[//]: # (  year         = 2021,)
+
+[//]: # (  publisher    = {Zenodo},)
+
+[//]: # (  version      = {0.2.0},)
+
+[//]: # (  doi          = {10.5281/zenodo.5706784},)
+
+[//]: # (  url          = {https://doi.org/10.5281/zenodo.5706785})
+
+[//]: # (})
+
+[//]: # (```)
+
 [quay.io]: https://quay.io/repository/mbhall88/ontime
 
 [singularity]: https://sylabs.io/guides/3.5/user-guide/quick_start.html#quick-installation-steps
