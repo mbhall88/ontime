@@ -162,8 +162,7 @@ Earliest: 2022-12-12T15:17:01.0Z
 Latest  : 2022-12-13T01:16:27.0Z
 ```
 
-I like to be specific, give me the reads that were sequenced **while I was eating dinner
-** (see [note on time formats](#time-format))
+I like to be specific, give me the reads that were sequenced **while I was eating dinner** (see [note on time formats](#time-format))
 
 ```shell
 ontime --from 2022-12-12T20:45:00Z --to 2022-12-12T21:17:01.5Z in.fq
