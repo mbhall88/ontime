@@ -4,6 +4,7 @@
 [![Crates.io](https://img.shields.io/crates/v/ontime.svg)](https://crates.io/crates/ontime)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![github release version](https://img.shields.io/github/v/release/mbhall88/ontime)](https://github.com/mbhall88/ontime/releases)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7533053.svg)](https://doi.org/10.5281/zenodo.7533053)
 
 Extract subsets of ONT (Nanopore) reads based on time
 
@@ -11,6 +12,7 @@ Extract subsets of ONT (Nanopore) reads based on time
 - [Install](#install)
 - [Examples](#examples)
 - [Usage](#usage)
+    - [Time range format](#specifying-a-time-range)
 - [Cite](#cite)
 
 ## Motivation
@@ -162,7 +164,8 @@ Earliest: 2022-12-12T15:17:01.0Z
 Latest  : 2022-12-13T01:16:27.0Z
 ```
 
-I like to be specific, give me the reads that were sequenced **while I was eating dinner** (see [note on time formats](#time-format))
+I like to be specific, give me the reads that were sequenced **while I was eating dinner
+** (see [note on time formats](#time-format))
 
 ```shell
 ontime --from 2022-12-12T20:45:00Z --to 2022-12-12T21:17:01.5Z in.fq
@@ -205,6 +208,11 @@ hour or more after sequencing started" - i.e. the earliest start time in the fil
 hour. Likewise, passing `--to 2h` says "I only want reads that were generated before the
 second hour of sequencing". Using `--from` and `--to` in combination gives you a range.
 
+We support a range of time/duration units and they can be combined. For example,
+`3h45m` to indicate 3 hours and 45 minutes. See the [`duration-str` docs][duration] for
+the full list
+of support duration units.
+
 Negative durations are also allowed. A negative duration subtracts that duration from
 the **latest** start time in the file. So `--to -1h` will exclude reads that were
 sequenced in the last hour of the run. Negative ranges are also valid -
@@ -233,7 +241,8 @@ time, please first [convert it to UTC time][utc].
 In general, the timestamp format `ontime` accepts anything that
 is [RFC339-compliant][rfc3339].
 
-The basic (recommended) format is `<YEAR>-<MONTH>-<DAY>T<HOUR>:<MINUTE>:<SECONDS>Z` - e.g. `2022-12-12T18:39:09Z`. Feel free to get precise with
+The basic (recommended) format is `<YEAR>-<MONTH>-<DAY>T<HOUR>:<MINUTE>:<SECONDS>Z` -
+e.g. `2022-12-12T18:39:09Z`. Feel free to get precise with
 subseconds though if you like...
 
 ### Full usage
@@ -281,37 +290,22 @@ Options:
           Print version information
 ```
 
-
 ## Cite
 
-[//]: # (`ontime` is archived [at Zenodo]&#40;https://zenodo.org/record/5706785&#41;.)
+`ontime` is archived [at Zenodo](https://doi.org/10.5281/zenodo.7533052).
 
-[//]: # ()
-[//]: # (```bibtex)
-
-[//]: # (@software{Hall2023ontime,)
-
-[//]: # (  author       = {Hall, Michael B.},)
-
-[//]: # (  title        = {{psdm: Compute a pairwise SNP distance matrix from )
-
-[//]: # (                   one or two alignment&#40;s&#41;}},)
-
-[//]: # (  month        = nov,)
-
-[//]: # (  year         = 2021,)
-
-[//]: # (  publisher    = {Zenodo},)
-
-[//]: # (  version      = {0.2.0},)
-
-[//]: # (  doi          = {10.5281/zenodo.5706784},)
-
-[//]: # (  url          = {https://doi.org/10.5281/zenodo.5706785})
-
-[//]: # (})
-
-[//]: # (```)
+```bibtex
+@software{ontime,
+  author       = {Michael Hall},
+  title        = {mbhall88/ontime: 0.1.3},
+  month        = jan,
+  year         = 2023,
+  publisher    = {Zenodo},
+  version      = {0.1.3},
+  doi          = {10.5281/zenodo.7533053},
+  url          = {https://doi.org/10.5281/zenodo.7533053}
+}
+```
 
 [quay.io]: https://quay.io/repository/mbhall88/ontime
 
@@ -322,3 +316,5 @@ Options:
 [utc]: https://www.timeanddate.com/worldclock/timezone/utc
 
 [rfc3339]: https://www.rfc-editor.org/rfc/rfc3339#section-5.8
+
+[duration]: https://github.com/baoyachi/duration-str#duration-unit-list
