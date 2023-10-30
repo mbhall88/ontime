@@ -13,7 +13,7 @@ Extract subsets of ONT (Nanopore) reads based on time
 - [Examples](#examples)
 - [Usage](#usage)
     - [Time range format](#specifying-a-time-range)
-  - [Usage with Dorado output](#usage-with-dorado-output)] 
+  - [Usage with Dorado output](#usage-with-dorado-output) 
 - [Cite](#cite)
 
 ## Motivation
