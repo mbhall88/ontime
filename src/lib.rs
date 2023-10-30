@@ -7,7 +7,7 @@ use time::format_description::well_known::Rfc3339;
 use time::{Duration, PrimitiveDateTime};
 
 lazy_static! {
-    pub static ref DATETIME_RE: Regex = Regex::new(r"start_time=(?P<time>\S+)\s*").unwrap();
+    pub static ref DATETIME_RE: Regex = Regex::new(r"(start_time=|st:Z:)(?P<time>\S+)\s*").unwrap();
 }
 
 pub trait FastxRecordExt {
@@ -16,8 +16,8 @@ pub trait FastxRecordExt {
 
 impl FastxRecordExt for SequenceRecord<'_> {
     fn start_time(&self) -> Option<PrimitiveDateTime> {
-        let Some(caps) = DATETIME_RE.captures(self.id()) else {return None};
-        let Some(m) = caps.name("time") else {return None};
+        let caps = DATETIME_RE.captures(self.id())?;
+        let m = caps.name("time")?;
         let datetime = m.as_bytes().to_str_lossy();
         PrimitiveDateTime::parse(&datetime, &Rfc3339).ok()
     }
@@ -157,6 +157,22 @@ mod tests {
 
         let actual = record.start_time();
         let expected = None;
+
+        assert_eq!(actual, expected)
+    }
+
+    #[test]
+    fn test_bam_tag_start_time_is_valid() {
+        let text = "@read1 st:Z:2023-08-07T13:14:42.356+00:00\nA\n+\n1";
+        let mut file = Builder::new().suffix(".fa").tempfile().unwrap();
+        file.write_all(text.as_bytes()).unwrap();
+
+        let mut reader = parse_fastx_file(file.path()).unwrap();
+        let rec = reader.next().unwrap();
+        let record = rec.unwrap();
+
+        let actual = record.start_time().unwrap();
+        let expected = PrimitiveDateTime::new(date!(2023 - 08 - 07), time!(13:14:42.356));
 
         assert_eq!(actual, expected)
     }
