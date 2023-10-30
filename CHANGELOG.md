@@ -5,6 +5,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [0.2.1](https://github.com/mbhall88/ontime/compare/0.2.0..0.2.1) - 2023-10-30
+#### Bug Fixes
+- support start time from dorado bam [#2] - ([1404e38](https://github.com/mbhall88/ontime/commit/1404e383a062823f8868fa443c38e28ca34ea0f5)) - [@mbhall88](https://github.com/mbhall88)
+#### Build system
+- update needletail - ([ee6184e](https://github.com/mbhall88/ontime/commit/ee6184e09b24052709697fc9b35e59fffbd3bebe)) - [@mbhall88](https://github.com/mbhall88)
+#### Continuous Integration
+- add pre bump hook for cog - ([aa5f8ce](https://github.com/mbhall88/ontime/commit/aa5f8ce5a23a5f4ab51b8db395de7466d8d066cd)) - [@mbhall88](https://github.com/mbhall88)
+- add release please - ([966c29e](https://github.com/mbhall88/ontime/commit/966c29ed843054c8fafd22b42f25d496bbea55a3)) - [@mbhall88](https://github.com/mbhall88)
+#### Features
+- support ztd - ([e91c34d](https://github.com/mbhall88/ontime/commit/e91c34d0e69b6dcbdb097dadbcf0977f05e1d9ea)) - [@mbhall88](https://github.com/mbhall88)
+#### Miscellaneous Chores
+- **(version)** 0.2.0 - ([71c09c6](https://github.com/mbhall88/ontime/commit/71c09c611330847603697a5f380e719a39e108ac)) - [@mbhall88](https://github.com/mbhall88)
+- add separators to changelog - ([a533226](https://github.com/mbhall88/ontime/commit/a533226a003defa7b2599c8b150d1c9a07d78957)) - [@mbhall88](https://github.com/mbhall88)
+- add cog config file - ([63b585b](https://github.com/mbhall88/ontime/commit/63b585b5709ace7b72b760c4a27a09912465b771)) - [@mbhall88](https://github.com/mbhall88)
+- add explanation about dorado - ([5378de1](https://github.com/mbhall88/ontime/commit/5378de1848d8b78b123a87f2b547c0b70621c3ed)) - [@mbhall88](https://github.com/mbhall88)
+
+- - -
+
 ## [0.2.0](https://github.com/mbhall88/ontime/compare/0.1.3..0.2.0) - 2023-10-30
 #### Bug Fixes
 - support start time from dorado bam [#2] - ([cd60b24](https://github.com/mbhall88/ontime/commit/cd60b242de49f17fb59888a2063900fc8cc842f9)) - [@mbhall88](https://github.com/mbhall88)
