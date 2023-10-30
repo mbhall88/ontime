@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [0.2.0](https://github.com/mbhall88/ontime/compare/0.1.3...0.2.0) (2023-10-30)
+
+
+### Features
+
+* support ztd ([e91c34d](https://github.com/mbhall88/ontime/commit/e91c34d0e69b6dcbdb097dadbcf0977f05e1d9ea))
+
+
+### Bug Fixes
+
+* support start time from dorado bam [[#2](https://github.com/mbhall88/ontime/issues/2)] ([1404e38](https://github.com/mbhall88/ontime/commit/1404e383a062823f8868fa443c38e28ca34ea0f5))
+
 ## [0.2.1](https://github.com/mbhall88/ontime/compare/0.2.0..0.2.1) - 2023-10-30
 #### Bug Fixes
 - support start time from dorado bam [#2] - ([1404e38](https://github.com/mbhall88/ontime/commit/1404e383a062823f8868fa443c38e28ca34ea0f5)) - [@mbhall88](https://github.com/mbhall88)
