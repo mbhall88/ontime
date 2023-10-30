@@ -100,7 +100,7 @@ jobs:
           PKG_suffix=".tar.gz" ; case ${{ matrix.job.target }} in *-pc-windows-*) PKG_suffix=".zip" ;; esac;
           PKG_BASENAME=${PROJECT_NAME}-${PROJECT_VERSION}-${{ matrix.job.target }}
           PKG_NAME=${PKG_BASENAME}${PKG_suffix}
-          echo ::set-output name=PKG_NAME::${PKG_NAME}
+          echo "PKG_NAME=${PKG_NAME}" >> $GITHUB_OUTPUT
           PKG_STAGING="${{ env.CICD_INTERMEDIATES_DIR }}/package"
           ARCHIVE_DIR="${PKG_STAGING}/${PKG_BASENAME}/"
           mkdir -p "${ARCHIVE_DIR}"
@@ -120,7 +120,7 @@ jobs:
           popd >/dev/null
           
           # Let subsequent steps know where to find the compressed package
-          echo ::set-output name=PKG_PATH::"${PKG_STAGING}/${PKG_NAME}"
+          echo "PKG_PATH=${PKG_STAGING}/${PKG_NAME}" >> $GITHUB_OUTPUT
 
       - name: "Artifact upload: tarball"
         uses: actions/upload-artifact@master
@@ -133,7 +133,7 @@ jobs:
         shell: bash
         run: |
           unset IS_RELEASE ; if [[ $GITHUB_REF =~ ^refs/tags/[0-9].* ]]; then IS_RELEASE='true' ; fi
-          echo ::set-output name=IS_RELEASE::${IS_RELEASE}
+          echo "IS_RELEASE=${IS_RELEASE}" >> $GITHUB_OUTPUT
 
       - name: Publish archives and packages
         uses: softprops/action-gh-release@v1
