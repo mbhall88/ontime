@@ -1,0 +1,11 @@
+branch_whitelist = [ "main", "release/**" ]
+
+[changelog]
+path = "CHANGELOG.md"
+template = "remote"
+remote = "github.com"
+repository = "ontime"
+owner = "mbhall88"
+authors = [
+    { signature = "Michael Hall", username = "mbhall88" },
+]
