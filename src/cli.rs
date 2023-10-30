@@ -35,7 +35,7 @@ pub struct Cli {
     #[clap(short = 'O', long, value_name = "u|b|g|l", value_parser = parse_compression_format, ignore_case=true, hide_possible_values = true)]
     pub output_type: Option<niffler::compression::Format>,
     /// Compression level to use if compressing output
-    #[clap(short = 'L', long, value_parser = parse_level, default_value="6", value_name = "1-9")]
+    #[clap(short = 'L', long, value_parser = parse_level, default_value="6", value_name = "1-21")]
     pub compress_level: niffler::Level,
     /// Earliest start time; otherwise the earliest time is used
     ///
@@ -74,12 +74,13 @@ impl CompressionExt for niffler::compression::Format {
             Some(Some("gz")) => Self::Gzip,
             Some(Some("bz") | Some("bz2")) => Self::Bzip,
             Some(Some("lzma")) => Self::Lzma,
+            Some(Some("zst")) => Self::Zstd,
             _ => Self::No,
         }
     }
 }
 
-/// A utility function to validate compression level is in allowed range
+/// A utility function to validate compression level is in allowed range between 1 and 21
 fn parse_level(s: &str) -> Result<niffler::Level, String> {
     let lvl = match s.parse::<u8>() {
         Ok(1) => niffler::Level::One,
@@ -91,6 +92,18 @@ fn parse_level(s: &str) -> Result<niffler::Level, String> {
         Ok(7) => niffler::Level::Seven,
         Ok(8) => niffler::Level::Eight,
         Ok(9) => niffler::Level::Nine,
+        Ok(10) => niffler::Level::Ten,
+        Ok(11) => niffler::Level::Eleven,
+        Ok(12) => niffler::Level::Twelve,
+        Ok(13) => niffler::Level::Thirteen,
+        Ok(14) => niffler::Level::Fourteen,
+        Ok(15) => niffler::Level::Fifteen,
+        Ok(16) => niffler::Level::Sixteen,
+        Ok(17) => niffler::Level::Seventeen,
+        Ok(18) => niffler::Level::Eighteen,
+        Ok(19) => niffler::Level::Nineteen,
+        Ok(20) => niffler::Level::Twenty,
+        Ok(21) => niffler::Level::TwentyOne,
         _ => return Err(format!("Compression level {} not in the range 1-9", s)),
     };
     Ok(lvl)
@@ -101,6 +114,7 @@ fn parse_compression_format(s: &str) -> Result<niffler::compression::Format, Cli
         "b" | "B" => Ok(niffler::Format::Bzip),
         "g" | "G" => Ok(niffler::Format::Gzip),
         "l" | "L" => Ok(niffler::Format::Lzma),
+        "z" | "Z" => Ok(niffler::Format::Zstd),
         "u" | "U" => Ok(niffler::Format::No),
         _ => Err(CliError::InvalidCompression(s.to_string())),
     }
@@ -155,6 +169,9 @@ mod tests {
         s = "U";
         assert_eq!(parse_compression_format(s).unwrap(), niffler::Format::No);
 
+        s = "z";
+        assert_eq!(parse_compression_format(s).unwrap(), niffler::Format::Zstd);
+
         s = "a";
         assert_eq!(
             parse_compression_format(s).unwrap_err(),
@@ -167,7 +184,8 @@ mod tests {
         assert!(parse_level("1").is_ok());
         assert!(parse_level("9").is_ok());
         assert!(parse_level("0").is_err());
-        assert!(parse_level("10").is_err());
+        assert!(parse_level("10").is_ok());
+        assert!(parse_level("22").is_err());
         assert!(parse_level("f").is_err());
         assert!(parse_level("5.5").is_err());
         assert!(parse_level("-3").is_err());
@@ -193,6 +211,10 @@ mod tests {
         assert_eq!(
             niffler::Format::from_path("baz.fq.lzma"),
             niffler::Format::Lzma
+        );
+        assert_eq!(
+            niffler::Format::from_path("baz.fq.zst"),
+            niffler::Format::Zstd
         );
     }
 
