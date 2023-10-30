@@ -1,6 +1,6 @@
 [package]
 name = "ontime"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 authors = ["Michael Hall <michael@mbh.sh>"]
 description = "Extract subsets of ONT (Nanopore) reads based on time"
