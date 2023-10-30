@@ -77,8 +77,19 @@ get_tmpdir() {
 
 # Gets the latest github release tag (version)
 get_version_from_github() {
-  ver=$(wget -qO - "https://api.github.com/repos/${GH_USER}/${PROJECT}/releases/latest" |
-    grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+  # if wget is available
+  if command -v wget >/dev/null 2>&1; then
+    ver=$(wget -qO - "https://api.github.com/repos/${GH_USER}/${PROJECT}/releases/latest" |
+      grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+  # use curl if no wget
+  elif command -v curl >/dev/null 2>&1; then
+    ver=$(curl -s "https://api.github.com/repos/${GH_USER}/${PROJECT}/releases/latest" |
+      grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+  else
+    error "No HTTP download program (curl or wget) found, exiting…"
+    return 1
+  fi
+
   echo "$ver"
 }
 
@@ -443,6 +454,11 @@ if [ "${PLATFORM}" = "pc-windows-msvc" ]; then
 fi
 
 VERSION=$(get_version_from_github)
+if [ -z "$VERSION" ]; then
+  error "Could not get latest version from GitHub"
+  exit 1
+fi
+
 URL="${BASE_URL}/latest/download/${PROJECT}-${VERSION}-${TARGET}.${EXT}"
 info "Tarball URL: ${UNDERLINE}${BLUE}${URL}${NO_COLOR}"
 confirm "Install $PROJECT ${GREEN}v${VERSION} (latest)${NO_COLOR} to ${BOLD}${GREEN}${BIN_DIR}${NO_COLOR}?"
