@@ -1,4 +1,9 @@
 branch_whitelist = [ "main", "release/**" ]
+pre_bump_hooks = [
+    "cargo build --release",
+    "echo 'bumping from {{latest}} to {{version}}'",
+    "cargo bump {{version}}",
+]
 
 [changelog]
 path = "CHANGELOG.md"
