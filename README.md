@@ -13,6 +13,7 @@ Extract subsets of ONT (Nanopore) reads based on time
 - [Examples](#examples)
 - [Usage](#usage)
     - [Time range format](#specifying-a-time-range)
+  - [Usage with Dorado output](#usage-with-dorado-output)] 
 - [Cite](#cite)
 
 ## Motivation
@@ -82,6 +83,8 @@ $ conda install -c bioconda ontime
 ```
 
 ### Cargo
+
+![Crates.io](https://img.shields.io/crates/d/ontime)
 
 ```shell
 $ cargo install ontime
@@ -164,7 +167,8 @@ Earliest: 2022-12-12T15:17:01.0Z
 Latest  : 2022-12-13T01:16:27.0Z
 ```
 
-I like to be specific, give me the reads that were sequenced **while I was eating dinner** (see [note on time formats](#time-format))
+I like to be specific, give me the reads that were sequenced **while I was eating dinner** (
+see [note on time formats](#time-format))
 
 ```shell
 ontime --from 2022-12-12T20:45:00Z --to 2022-12-12T21:17:01.5Z in.fq
@@ -188,12 +192,12 @@ Arguments:
 Options:
   -o, --output <FILE>          Output file name [default: stdout]
   -O, --output-type <u|b|g|l>  u: uncompressed; b: Bzip2; g: Gzip; l: Lzma
-  -L, --compress-level <1-9>   Compression level to use if compressing output [default: 6]
+  -L, --compress-level <1-21>  Compression level to use if compressing output [default: 6]
   -f, --from <DATE/DURATION>   Earliest start time; otherwise the earliest time is used
   -t, --to <DATE/DURATION>     Latest start time; otherwise the latest time is used
   -s, --show                   Show the earliest and latest start times in the input and exit
-  -h, --help                   Print help information (use `--help` for more detail)
-  -V, --version                Print version information
+  -h, --help                   Print help (see more with '--help')
+  -V, --version                Print version
 ```
 
 #### Specifying a time range
@@ -226,7 +230,7 @@ get the earliest and latest timestamps in the file.
 
 #### Time format
 
-The times that `ontime` extracts are the `start_time=<time>` section contained in the
+The times that `ontime` extracts are the `start_time=<time>` or `st:Z:<time>` section contained in the
 description of each fastq read.
 The format of this time has changed a few times, so if you come across a file
 which `ontime` cannot parse, please raise an issue so I can make it work.
@@ -243,6 +247,28 @@ is [RFC339-compliant][rfc3339].
 The basic (recommended) format is `<YEAR>-<MONTH>-<DAY>T<HOUR>:<MINUTE>:<SECONDS>Z` -
 e.g. `2022-12-12T18:39:09Z`. Feel free to get precise with
 subseconds though if you like...
+
+### Usage with Dorado output
+
+[Dorado][dorado] (the latest basecaller from ONT) outputs BAM/SAM by default. If you want to use `ontime` on this data
+you need to convert it to fastq/fasta, ensuring you keep the tags, as these contain the start time `ontime` relies on.
+
+Convert BAM to fastq keeping all tags
+
+```shell
+$ samtools fastq -T '*' reads.bam > reads.fq
+```
+
+Or if you only want the start times
+
+```shell
+$ samtools fastq -T 'st' reads.bam > reads.fq
+```
+
+*Note: you can use `samtools fasta` instead if you only want FASTA output.*
+
+The start time is encoded in the header of each read in the tag form `st:Z:<time>`.
+
 
 ### Full usage
 
@@ -264,7 +290,7 @@ Options:
 
           ontime will attempt to infer the output compression format automatically from the output extension. If writing to stdout, the default is uncompressed (u)
 
-  -L, --compress-level <1-9>
+  -L, --compress-level <1-21>
           Compression level to use if compressing output
 
           [default: 6]
@@ -283,10 +309,10 @@ Options:
           Show the earliest and latest start times in the input and exit
 
   -h, --help
-          Print help information (use `-h` for a summary)
+          Print help (see a summary with '-h')
 
   -V, --version
-          Print version information
+          Print version
 ```
 
 ## Cite
@@ -317,3 +343,5 @@ Options:
 [rfc3339]: https://www.rfc-editor.org/rfc/rfc3339#section-5.8
 
 [duration]: https://github.com/baoyachi/duration-str#duration-unit-list
+
+[dorado]: https://github.com/nanoporetech/dorado
