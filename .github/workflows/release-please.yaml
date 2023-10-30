@@ -18,3 +18,4 @@ jobs:
           release-type: rust
           package-name: ontime
           include-v-in-tag: false
+          token: ${{ secrets.PAT }}
