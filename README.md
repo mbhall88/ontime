@@ -13,7 +13,6 @@ Extract subsets of ONT (Nanopore) reads based on time
 - [Examples](#examples)
 - [Usage](#usage)
     - [Time range format](#specifying-a-time-range)
-  - [Usage with Dorado output](#usage-with-dorado-output) 
 - [Cite](#cite)
 
 ## Motivation
@@ -141,6 +140,12 @@ I want the reads that were sequenced **in the first hour**
 $ ontime --to 1h in.fq
 ```
 
+The same, but using a BAM file as input
+
+```shell
+$ ontime --to 1h in.bam
+```
+
 I want the reads that were sequenced **after the first hour**
 
 ```shell
@@ -156,7 +161,7 @@ $ ontime --to -1h in.fq
 I want reads sequenced **between the third and fourth hours**
 
 ```shell
-ontime --from 3h --to 4h in.fq
+$ ontime --from 3h --to 4h in.fq
 ```
 
 Check what the earliest and latest start times in the fastq are
@@ -171,28 +176,29 @@ I like to be specific, give me the reads that were sequenced **while I was eatin
 see [note on time formats](#time-format))
 
 ```shell
-ontime --from 2022-12-12T20:45:00Z --to 2022-12-12T21:17:01.5Z in.fq
+$ ontime --from 2022-12-12T20:45:00Z --to 2022-12-12T21:17:01.5Z in.fq
 ```
 
 I want to save the output to a Gzip-compressed file
 
 ```shell
 $ ontime --to 2h -o out.fq.gz in.fq
-
 ```
 
 ## Usage
 
 ```
+Extract subsets of ONT (Nanopore) reads based on time
+
 Usage: ontime [OPTIONS] <FILE>
 
 Arguments:
-  <FILE>  Input fastq file
+  <FILE>  Input fastq/fasta/BAM/SAM file
 
 Options:
   -o, --output <FILE>          Output file name [default: stdout]
-  -O, --output-type <u|b|g|l>  u: uncompressed; b: Bzip2; g: Gzip; l: Lzma
-  -L, --compress-level <1-21>  Compression level to use if compressing output [default: 6]
+  -O, --output-type <u|b|g|l>  (fastq/a output only) u: uncompressed; b: Bzip2; g: Gzip; l: Lzma
+  -L, --compress-level <1-21>  Compression level to use if compressing fastq output [default: 6]
   -f, --from <DATE/DURATION>   Earliest start time; otherwise the earliest time is used
   -t, --to <DATE/DURATION>     Latest start time; otherwise the latest time is used
   -s, --show                   Show the earliest and latest start times in the input and exit
@@ -248,27 +254,6 @@ The basic (recommended) format is `<YEAR>-<MONTH>-<DAY>T<HOUR>:<MINUTE>:<SECONDS
 e.g. `2022-12-12T18:39:09Z`. Feel free to get precise with
 subseconds though if you like...
 
-### Usage with Dorado output
-
-[Dorado][dorado] (the latest basecaller from ONT) outputs BAM/SAM by default. If you want to use `ontime` on this data
-you need to convert it to fastq/fasta, ensuring you keep the tags, as these contain the start time `ontime` relies on.
-
-Convert BAM to fastq keeping all tags
-
-```shell
-$ samtools fastq -T '*' reads.bam > reads.fq
-```
-
-Or if you only want the start times
-
-```shell
-$ samtools fastq -T 'st' reads.bam > reads.fq
-```
-
-*Note: you can use `samtools fasta` instead if you only want FASTA output.*
-
-The start time is encoded in the header of each read in the tag form `st:Z:<time>`.
-
 
 ### Full usage
 
@@ -279,19 +264,21 @@ Usage: ontime [OPTIONS] <FILE>
 
 Arguments:
   <FILE>
-          Input fastq file
+          Input fastq/fasta/BAM/SAM file
 
 Options:
   -o, --output <FILE>
           Output file name [default: stdout]
 
+          Note: you cannot output a fastq if a BAM/SAM input is given and vice versa. Use samtools for post-processing. However, you can output SAM if the input is BAM and vice versa.
+
   -O, --output-type <u|b|g|l>
-          u: uncompressed; b: Bzip2; g: Gzip; l: Lzma
+          (fastq/a output only) u: uncompressed; b: Bzip2; g: Gzip; l: Lzma
 
           ontime will attempt to infer the output compression format automatically from the output extension. If writing to stdout, the default is uncompressed (u)
 
   -L, --compress-level <1-21>
-          Compression level to use if compressing output
+          Compression level to use if compressing fastq output
 
           [default: 6]
 
@@ -331,6 +318,8 @@ Options:
   url          = {https://doi.org/10.5281/zenodo.7533053}
 }
 ```
+
+and replace the version number with whichever you used.
 
 [quay.io]: https://quay.io/repository/mbhall88/ontime
 

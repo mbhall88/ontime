@@ -1,11 +1,15 @@
 use crate::cli::CompressionExt;
+use anyhow::anyhow;
 use needletail::errors::ParseErrorKind::EmptyFile;
 use needletail::parse_fastx_file;
+use noodles_sam::alignment::record::data::field::Tag;
+use noodles_util::alignment::io::Writer;
 use ontime::FastxRecordExt;
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::{BufRead, BufWriter, Write};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
+use time::format_description::well_known::Rfc3339;
 use time::PrimitiveDateTime;
 
 /// A `Struct` used for seamlessly dealing with either compressed or uncompressed fasta/fastq files.
@@ -49,6 +53,14 @@ pub enum IOError {
     /// Indicates that writing to the output file failed.
     #[error("Could not write to output file")]
     WriteError { source: anyhow::Error },
+
+    /// Indicates there was an error reading the header of the input file.
+    #[error("Could not read the header of the input file")]
+    ReadHeaderError { source: anyhow::Error },
+
+    /// Indicates that the alignment file record could not be parsed.
+    #[error("Failed to parse alignment record")]
+    ParseAlignmentError { source: anyhow::Error },
 }
 
 impl Fastx {
@@ -152,6 +164,82 @@ impl Fastx {
             read_idx += 1;
         }
 
+        if nb_reads_written == nb_reads_keep {
+            Ok(())
+        } else {
+            Err(IOError::IndicesNotFound)
+        }
+    }
+}
+
+pub trait TimeExt {
+    fn start_times(&mut self) -> Result<Vec<PrimitiveDateTime>, IOError>;
+    fn extract_reads_in_timeframe_into(
+        &mut self,
+        reads_to_keep: &[bool],
+        nb_reads_keep: usize,
+        writer: &mut Writer,
+    ) -> Result<(), IOError>;
+}
+
+impl TimeExt for noodles_util::alignment::io::reader::Reader<Box<dyn BufRead>> {
+    fn start_times(&mut self) -> Result<Vec<PrimitiveDateTime>, IOError> {
+        let mut start_times: Vec<PrimitiveDateTime> = vec![];
+        let header = self
+            .read_header()
+            .map_err(|source| IOError::ReadHeaderError {
+                source: anyhow::Error::from(source),
+            })?;
+        let records = self.records(&header);
+        let tag = Tag::new(b's', b't');
+
+        for (i, record) in records.enumerate() {
+            let record = record.map_err(|source| IOError::ParseAlignmentError {
+                source: anyhow! { source.to_string() },
+            })?;
+            let data = record.data();
+            let start_time = data
+                .get(&tag)
+                .ok_or(IOError::MissingTime(i as u64))?
+                .map_err(|_| IOError::MissingTime(i as u64))?;
+            let start_time = match start_time {
+                noodles_sam::alignment::record::data::field::Value::String(s) => s.to_string(),
+                _ => return Err(IOError::MissingTime(i as u64)),
+            };
+            let start_time = PrimitiveDateTime::parse(&start_time, &Rfc3339)
+                .map_err(|_| IOError::MissingTime(i as u64))?;
+            start_times.push(start_time);
+        }
+        Ok(start_times)
+    }
+
+    fn extract_reads_in_timeframe_into(
+        &mut self,
+        reads_to_keep: &[bool],
+        nb_reads_keep: usize,
+        writer: &mut Writer,
+    ) -> Result<(), IOError> {
+        let header = self
+            .read_header()
+            .map_err(|source| IOError::ReadHeaderError {
+                source: anyhow::Error::from(source),
+            })?;
+        let records = self.records(&header);
+        let mut nb_reads_written = 0;
+
+        for (i, record) in records.enumerate() {
+            let record = record.map_err(|source| IOError::ParseAlignmentError {
+                source: anyhow! { source.to_string() },
+            })?;
+            if reads_to_keep[i] {
+                writer
+                    .write_record(&header, &record)
+                    .map_err(|source| IOError::WriteError {
+                        source: anyhow::Error::from(source),
+                    })?;
+                nb_reads_written += 1;
+            }
+        }
         if nb_reads_written == nb_reads_keep {
             Ok(())
         } else {

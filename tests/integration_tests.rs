@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use bstr::ByteSlice;
 use indoc::indoc;
 use std::io::Write;
 
@@ -16,7 +17,7 @@ fn input_file_does_not_exist() -> Result<(), Box<dyn std::error::Error>> {
 
 #[test]
 fn trying_to_create_output_in_nonexistent_dir() -> Result<(), Box<dyn std::error::Error>> {
-    let text = ">s0\nACGT\n>s1\nGCCC\n";
+    let text = ">s0 start_time=2022-12-12T18:00:00Z\nACGT\n";
     let mut file = tempfile::Builder::new().suffix(".fa").tempfile().unwrap();
     file.write_all(text.as_bytes()).unwrap();
     let mut cmd = Command::cargo_bin(BIN).unwrap();
@@ -48,7 +49,7 @@ fn input_has_no_start_times() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin(BIN).unwrap();
     let err_msg = cmd.args([file.path()]).unwrap_err().to_string();
 
-    assert!(err_msg.contains("Failed to parse a start time"));
+    assert!(err_msg.contains("Missing start_time in fastq record start at line 1"));
 
     Ok(())
 }
@@ -69,7 +70,7 @@ fn input_has_one_read_with_no_start_time() -> Result<(), Box<dyn std::error::Err
     let mut cmd = Command::cargo_bin(BIN).unwrap();
     let err_msg = cmd.args([file.path()]).unwrap_err().to_string();
 
-    assert!(err_msg.contains("Failed to parse a start time"));
+    assert!(err_msg.contains("Missing start_time in fastq record start at line 5"));
 
     Ok(())
 }
@@ -90,7 +91,7 @@ fn input_has_one_read_with_no_valid_start_time() -> Result<(), Box<dyn std::erro
     let mut cmd = Command::cargo_bin(BIN).unwrap();
     let err_msg = cmd.args([file.path()]).unwrap_err().to_string();
 
-    assert!(err_msg.contains("Failed to parse a start time"));
+    assert!(err_msg.contains("Missing start_time in fastq record start at line 5"));
 
     Ok(())
 }
@@ -430,6 +431,27 @@ fn show_earliest_and_latest() -> Result<(), Box<dyn std::error::Error>> {
     "};
 
     assert_eq!(output, expected);
+
+    Ok(())
+}
+
+#[test]
+fn sam_input() -> Result<(), Box<dyn std::error::Error>> {
+    let input = "tests/cases/test.sam";
+    let mut cmd = Command::cargo_bin(BIN).unwrap();
+    let output = cmd.args(["-t", "-4h", input]).unwrap().stdout;
+
+    let expected_n_records = 8;
+
+    let mut actual_n_records = 0;
+    for line in output.lines() {
+        if line.starts_with(b"@") {
+            continue;
+        }
+        actual_n_records += 1;
+    }
+
+    assert_eq!(actual_n_records, expected_n_records);
 
     Ok(())
 }
