@@ -29,6 +29,8 @@ regex = "1.7.1"
 bstr = "1.1.0"
 duration-str = "0.5.0"
 itertools = "0.10.5"
+noodles-util = { version = "0.34.1", features = ["alignment"] }
+noodles-sam = "0.51.0"
 
 [dev-dependencies]
 tempfile = "3.3.0"

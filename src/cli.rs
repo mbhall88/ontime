@@ -22,19 +22,22 @@ lazy_static! {
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
-    /// Input fastq file
+    /// Input fastq/fasta/BAM/SAM file
     #[clap(value_parser = check_path_exists, value_name = "FILE")]
     pub input: PathBuf,
     /// Output file name [default: stdout]
+    ///
+    /// Note: you cannot output a fastq if a BAM/SAM input is given and vice versa. Use samtools for post-processing.
+    /// However, you can output SAM if the input is BAM and vice versa.
     #[clap(short, long, value_name = "FILE")]
     pub output: Option<PathBuf>,
-    /// u: uncompressed; b: Bzip2; g: Gzip; l: Lzma
+    /// (fastq/a output only) u: uncompressed; b: Bzip2; g: Gzip; l: Lzma
     ///
     /// ontime will attempt to infer the output compression format automatically from the output
     /// extension. If writing to stdout, the default is uncompressed (u)
     #[clap(short = 'O', long, value_name = "u|b|g|l", value_parser = parse_compression_format, ignore_case=true, hide_possible_values = true)]
     pub output_type: Option<niffler::compression::Format>,
-    /// Compression level to use if compressing output
+    /// Compression level to use if compressing fastq output
     #[clap(short = 'L', long, value_parser = parse_level, default_value="6", value_name = "1-21")]
     pub compress_level: niffler::Level,
     /// Earliest start time; otherwise the earliest time is used
