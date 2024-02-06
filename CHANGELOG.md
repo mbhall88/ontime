@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [0.3.0](https://github.com/mbhall88/ontime/compare/0.2.3...0.3.0) (2024-02-06)
+
+
+### Features
+
+* support SAM/BAM [[#6](https://github.com/mbhall88/ontime/issues/6)] ([#7](https://github.com/mbhall88/ontime/issues/7)) ([9112946](https://github.com/mbhall88/ontime/commit/9112946663f671e6a0689183180b510b6ac6644c))
+
 ## [0.2.3](https://github.com/mbhall88/ontime/compare/0.2.2...0.2.3) (2023-10-30)
 
 
