@@ -43,7 +43,7 @@ jobs:
       - name: Lint
         run: just lint
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
@@ -57,15 +57,13 @@ jobs:
       - name: Run tests
         run: just test
 
-      - uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-tarpaulin@0.23.1
+      - uses: taiki-e/install-action@cargo-tarpaulin
 
       - name: Run cargo-tarpaulin
         run: just coverage
 
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
