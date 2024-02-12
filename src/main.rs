@@ -102,13 +102,12 @@ fn main() -> Result<()> {
         println!("Earliest: {}", first_timestamp.format(TIME_FMT)?);
         println!("Latest  : {}", last_timestamp.format(TIME_FMT)?);
         return Ok(());
-    } else {
-        info!(
-            "First and last timestamps in the input are {} and {}",
-            first_timestamp.format(TIME_FMT)?,
-            last_timestamp.format(TIME_FMT)?
-        );
     }
+    info!(
+        "First and last timestamps in the input are {} and {}",
+        first_timestamp.format(TIME_FMT)?,
+        last_timestamp.format(TIME_FMT)?
+    );
 
     let earliest = match args.earliest {
         None => first_timestamp.to_owned(),
@@ -196,6 +195,9 @@ fn main() -> Result<()> {
                 .build_from_path(&args.input)?;
             let header = bam_reader.read_header()?;
             writer.write_header(&header)?;
+            // need to reopen the bam reader as the header has been read and we need to read it again
+            let mut bam_reader = noodles_util::alignment::io::reader::Builder::default()
+                .build_from_path(&args.input)?;
             bam_reader.extract_reads_in_timeframe_into(
                 &reads_to_keep,
                 nb_reads_to_keep,
