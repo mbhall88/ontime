@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - - -
+## [0.3.1](https://github.com/mbhall88/ontime/compare/0.3.0...0.3.1) (2024-02-12)
+
+
+### Bug Fixes
+
+* bam header read error [[#9](https://github.com/mbhall88/ontime/issues/9)] ([fed1ff4](https://github.com/mbhall88/ontime/commit/fed1ff40ada340857d9f8f813e001370f60cffa4))
+
 ## [0.3.0](https://github.com/mbhall88/ontime/compare/0.2.3...0.3.0) (2024-02-06)
 
 
