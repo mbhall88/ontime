@@ -23,7 +23,7 @@ thiserror = "1.0.38"
 anyhow = "1.0.68"
 log = "0.4.17"
 env_logger = "0.10.0"
-time = { version = "0.3.17", features = ["parsing", "macros", "formatting"] }
+time = { version = "0.3.36", features = ["parsing", "macros", "formatting"] }
 lazy_static = "1.4.0"
 regex = "1.7.1"
 bstr = "1.1.0"
